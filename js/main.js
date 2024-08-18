@@ -23,16 +23,6 @@ document.addEventListener('DOMContentLoaded', function () {
     adjustMenu(true)
     $nav.classList.add('show')
   }
-	// 处理图片
-  var link="";
-  var a = document.getElementsByTagName('img');
-  for(i=0;i<a.length;i++){
-        if((a[i].src).indexOf("jianshu") > 0){
-        a[i].referrerPolicy='no-referrer';
-        link = a[i].src;
-        a[i].src = link+'?t='+Math.random();
-        }
-	}
 
   // sidebar menus
   const sidebarFn = {

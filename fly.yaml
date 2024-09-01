@@ -1,0 +1,71 @@
+# DNS 配置可自行修改
+port: 7890
+allow-lan: true
+mode: rule
+log-level: info
+unified-delay: true
+global-client-fingerprint: chrome
+dns:
+  enable: true
+  listen: :53
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver: 
+    - 119.29.29.29
+    - 223.5.5.5
+    - 114.114.114.114
+    - 8.8.8.8
+  nameserver:
+    - 119.29.29.29
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  fallback:
+    - https://1.0.0.1/dns-query
+    - tls://dns.google
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+
+# 编写 Hysteria2 客户端的协商配置信息
+proxies:
+  - name: 🇺🇲 fly 
+    type: hysteria2
+    server:  23.95.193.250 # Hysteria 服务域名
+    port: 443
+    password: Dillon.Z@7890 # 字符串校验密钥
+    sni: delong.us.kg # Hysteria 服务域名
+    skip-cert-verify: false
+
+# 分流组可自行创建或添加，proxies 参数下的节点名称，按需求自行增减，确保出现的节点名称在代理协议中可查找
+proxy-groups:
+- name: 负载均衡
+  type: load-balance
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  proxies:
+    - 🇺🇲 fly                              # 自定义添加的节点名称      
+
+- name: 自动选择
+  type: url-test
+  url: http://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+    - 🇺🇲 fly                              # 自定义添加的节点名称                                 
+    
+- name: 🌍选择代理
+  type: select
+  proxies:
+    - 负载均衡                                            # 自定义添加的节点名称
+    - 自动选择
+    - DIRECT
+    - 🇺🇲 fly 
+
+# 代理规则可自行添加 
+rules:
+  - GEOIP,LAN,DIRECT
+  - GEOIP,CN,DIRECT
+  - MATCH,🌍选择代理
